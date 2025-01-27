@@ -1,72 +1,145 @@
 #include <raylib.h>
+#include <iostream>
+#include <chrono>
 #include <vector>
-
-struct Particle
-{
-    Rectangle rect; // The rectangle representing the particle
-    float speed;    // The speed of the particle
-    // Add other properties here, e.g., direction
-};
+#include "time.h"
+#include "navButton.h"
+#include "stopWatch.h"
+#include "text.h"
+#include "main.h"
+#define UPPERTEXT_FONTSIZE 32
+#define STATETEXT_FONTSIZE 50
+using namespace std;
+using namespace chrono;
 
 int main()
 {
-    // Init Variables
-    const int TARGET_FPS = 60;
-    SetTargetFPS(TARGET_FPS);
-    InitWindow(800, 600, "Hello Raylib!");
+    // Init Window
+    SetConfigFlags(FLAG_WINDOW_RESIZABLE);
+    InitWindow(800, 600, "Clock");
+    SetTargetFPS(75);
 
-    std::vector<Particle> rain_particles;
+    // Init Buttons
+    vector<NavButton> buttons;
+    NavButton sampleButton;
+    initNavButtons(buttons, sampleButton);
 
-    // Create Particles with Randomized Positions and Speeds
-    for (int i = 0; i < 200; i++)
+    DisplayedText topLeftText, topText, topRightText, timeText, stopWatchText, stateText; // Declare all Text
+    timeText.text = getFormattedTime();                                                   // Init Time Text
+    stateText.text = currentState;                                                        // Init State Text
+    setUpperText(topLeftText, topText, topRightText);
+
+    // Init StopWatch
+    auto start = std::chrono::high_resolution_clock::now();
+    stopWatchText.text = getFormattedDuration(start).c_str();
+    bool stopWatchStarted = 0;
+    bool firstRunStopWatch = 1;
+
+    // Init Text Colors
+    topLeftText.color = topText.color = topRightText.color = stateText.color = RED;
+
+    // Init Font Sizes
+    topLeftText.fontSize = topText.fontSize = topRightText.fontSize = UPPERTEXT_FONTSIZE;
+    stateText.fontSize = STATETEXT_FONTSIZE;
+
+    // Positition All Text
+    posText(timeText, topText, sampleButton, stopWatchText, topLeftText, topRightText, stateText);
+    for (auto &button : buttons)
     {
-        Particle particle;
-        particle.rect.x = GetRandomValue(0, GetScreenWidth());
-        particle.rect.y = GetRandomValue(0, GetScreenHeight());
-        particle.rect.width = GetRandomValue(1, 3);
-        particle.rect.height = particle.rect.width + GetRandomValue(2, 4);
-        particle.speed = GetRandomValue(1, 5);
-        rain_particles.push_back(particle);
+        button.title.initNavButtonText(button, topText, timeText);
     }
-
     while (!WindowShouldClose())
     {
+        // Update
+        handleNavButtonClicks(buttons);
+        stateText.text = currentState;
+
+        // posText(timeText, topText, sampleButton, stopWatchText, topLeftText, topRightText, stateText); // except Button Text
+        if (handleNavButtonClicks(buttons))
+        {
+            stateText.text = currentState;
+            setUpperText(topLeftText, topText, topRightText);
+            posText(timeText, topText, sampleButton, stopWatchText, topLeftText, topRightText, stateText);
+        }
+        for (auto &button : buttons)
+        {
+            button.title.initNavButtonText(button, topText, timeText);
+        }
+        // Render
         BeginDrawing();
         ClearBackground(BLACK);
 
-        DrawText("Rain Simulation", 350, 280, 20, RAYWHITE);
-
-        for (auto &particle : rain_particles)
+        drawNavButtons(buttons);
+        if (currentState == "TIME")
         {
-            DrawRectangle(
-                particle.rect.x,
-                particle.rect.y,
-                particle.rect.width,
-                particle.rect.height,
-                BLUE);
+            buttons[0].color = RED;
+            buttons[1].color = RAYWHITE;
+            buttons[2].color = RAYWHITE;
 
-            particle.rect.y += particle.speed;
-
-            // Reset particle if it leaves the screen
-            if (static_cast<int>(particle.rect.y) > GetScreenHeight())
-            {
-                particle.rect.width = GetRandomValue(1, 3);
-                particle.rect.height = particle.rect.width + GetRandomValue(2, 4);
-                particle.rect.x = GetRandomValue(0, GetScreenWidth());
-                particle.rect.y = 0;
-                particle.speed = GetRandomValue(1, 4);
-            }
-
-            // Increase speed if the particle passes halfway down the screen
-            if (static_cast<int>(particle.rect.y) % 20 == 0 && particle.speed < 11)
-            {
-                particle.speed+= 0.1f;
-            }
+            timeText.text = getFormattedTime();
+            timeText.draw();
         }
+        if (currentState == "STOPWATCH")
+        {
+            buttons[0].color = RAYWHITE;
+            buttons[1].color = RED;
+            buttons[2].color = RAYWHITE;
 
+            if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && !handleNavButtonClicks(buttons))
+            {
+                firstRunStopWatch = 0;             // As Soon as its Clicked, This Flag is Set to 0 Until Reset
+                toggleStopWatch(stopWatchStarted); // Left button: Toggle Start/Stop
+            }
+            if (IsMouseButtonPressed(MOUSE_BUTTON_RIGHT) && !handleNavButtonClicks(buttons) && !stopWatchStarted) // Right button: Reset stopwatch On Stopped State
+            {
+                firstRunStopWatch = 1;
+                start = std::chrono::high_resolution_clock::now(); // Reset start time
+                stopWatchText.text = "00:00.00";                   // Reset the display text
+            }
+            if (firstRunStopWatch)
+            {
+                start = std::chrono::high_resolution_clock::now();
+            }
+            if (stopWatchStarted) // If stopwatch is running
+            {
+                stopWatchText.text = getFormattedDuration(start).c_str(); // Display the elapsed time
+            }
+            stopWatchText.draw();
+        }
+        drawUpperText(topLeftText, topText, topRightText);
+        stateText.draw();
         EndDrawing();
     }
-
     CloseWindow();
     return 0;
+}
+
+void posText(DisplayedText &timeText, DisplayedText &topText, NavButton &sampleButton, DisplayedText &stopWatchText, DisplayedText &topLeftText, DisplayedText &topRightText, DisplayedText &stateText, NavButtons buttons)
+{
+    {
+        // Order matters! Start with independent elements.
+
+        // 1. Position independent elements first
+        topText.posText(TOP, topText, timeText, sampleButton);           // Top-centered, no dependencies
+        topLeftText.posText(TOPLEFT, topText, timeText, sampleButton);   // Top-left corner
+        topRightText.posText(TOPRIGHT, topText, timeText, sampleButton); // Top-right corner
+
+        // 2. Position elements relative to the above
+        timeText.posText(CENTER_TEXT_RELATIVE, topText, timeText, sampleButton);      // Relative to topText
+        stopWatchText.posText(CENTER_TEXT_RELATIVE, topText, timeText, sampleButton); // Same as timeText
+
+        // 3. Finally, position elements with the most dependencies
+        stateText.posText(STATE_TEXT_RELATIVE, topText, timeText, sampleButton); // Relies on both topText and timeText
+        for (auto &button : buttons)
+        {
+            button.title.posText(BUTTON_TEXT_RELATIVE, topText, timeText, button);
+        }
+    }
+}
+
+void drawUpperText(DisplayedText &topLeftText, DisplayedText &topText, DisplayedText &topRightText)
+{
+    topLeftText.draw();
+    topText.draw();
+    topRightText.draw();
 }

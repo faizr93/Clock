@@ -1,3 +1,5 @@
 .vscode/
-Makefile
 tempCodeRunnerFile.c
+tempCodeRunnerFile.cpp
+.VSCodeCounter
+.gitignore
