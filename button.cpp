@@ -1,9 +1,12 @@
-#include "navButton.h"
+#include "button.h"
 #include <raylib.h>
 #include "globalConst.h"
 
+constexpr int TOTALNAVBUTTONS = 3;
+constexpr int OUTLINETHICKNESS = 10; // of navbuttons buttons
+
 // Constructor, Initialize/Position To Default values
-NavButton::NavButton()
+Button::Button()
 {
     padding = PADDING;
     rect.height = GetScreenHeight() / 7;                                                  // Keeps it Consistent Across Resizing
@@ -12,7 +15,7 @@ NavButton::NavButton()
     color = RAYWHITE;                                                                     // White Placeholder
 }
 
-void initNavButtons(NavButtons &buttons, NavButton &defaultButton)
+void initNavButtons(Buttons &buttons, Button &defaultButton)
 {
     const char *states[] = {"Time", "Stopwatch", "Alarm"};
     float spacing = (GetScreenWidth() - (2 * defaultButton.padding) - (TOTALNAVBUTTONS * defaultButton.rect.width)) / (TOTALNAVBUTTONS - 1);
@@ -25,7 +28,7 @@ void initNavButtons(NavButtons &buttons, NavButton &defaultButton)
     }
 }
 
-bool handleNavButtonClicks(NavButtons &buttons)
+bool handleNavButtonClicks(Buttons &buttons)
 {
     // Check for mouse clicks
     if (!(IsMouseButtonPressed(MOUSE_BUTTON_LEFT) || IsMouseButtonPressed(MOUSE_BUTTON_RIGHT)))
@@ -50,7 +53,7 @@ bool handleNavButtonClicks(NavButtons &buttons)
     return false;
 }
 
-void drawNavButtons(NavButtons &buttons)
+void drawNavButtons(Buttons &buttons)
 {
     for (auto &button : buttons)
     {
@@ -63,4 +66,3 @@ void drawNavButtons(NavButtons &buttons)
         button.title.draw();
     }
 }
-

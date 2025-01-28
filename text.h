@@ -3,9 +3,9 @@
 #include <raylib.h>
 #include <vector>
 
-// Forward 
-struct NavButton;
-using NavButtons = std::vector<NavButton>;
+// Forward
+struct Button;
+using Buttons = std::vector<Button>;
 // Declaration
 enum Position
 {
@@ -30,7 +30,7 @@ struct DisplayedText
     int padding;
     DisplayedText();
     void draw();
-    void posText(Position position, DisplayedText topText, DisplayedText timeText, NavButton button);
-    // void initButtonText(Rectangle parentRect);
-    void initNavButtonText(NavButton &defaultButton, DisplayedText &topText, DisplayedText &timeText);
+    void posText(Position position, Button &button);
+    void initNavButtonText(Button &button);
+    // void initButtonText(Rectangle parentRect)
 };
