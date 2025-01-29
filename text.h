@@ -1,11 +1,9 @@
 #pragma once
 #include <string>
 #include <raylib.h>
-#include <vector>
 
 // Forward
 struct Button;
-using Buttons = std::vector<Button>;
 // Declaration
 enum Position
 {
@@ -13,11 +11,9 @@ enum Position
     TOPLEFT,
     TOPRIGHT,
     CENTER_TEXT_RELATIVE,
-    BUTTON_TEXT_RELATIVE,
     STATE_TEXT_RELATIVE
 };
 
-extern std::string currentState;
 extern Position pos;
 struct DisplayedText
 {
@@ -30,7 +26,5 @@ struct DisplayedText
     int padding;
     DisplayedText();
     void draw();
-    void posText(Position position, Button &button);
-    void initNavButtonText(Button &button);
-    // void initButtonText(Rectangle parentRect)
+    void posText(Position position);
 };

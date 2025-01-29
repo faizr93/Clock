@@ -1,6 +1,7 @@
 #include <ctime>  // For time handling
 #include "time.h" // For the declaration of getFormattedTime()
 #include "text.h"
+#include "globalConst.h"
 
 char *getFormattedTime()
 {

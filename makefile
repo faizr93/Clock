@@ -5,7 +5,7 @@ LDFLAGS = -L/c/msys64/ucrt64/lib -lraylib -lglfw3 -lopengl32 -lgdi32 -luser32
 # Set the filename dynamically
 FILENAME = main
 TARGET = $(FILENAME).exe
-SRC = $(FILENAME).cpp time.cpp button.cpp text.cpp stopWatch.cpp
+SRC = $(FILENAME).cpp time.cpp button.cpp text.cpp stopWatch.cpp alarm.cpp globalConst.cpp
 
 # Default target that handles clean, build, and run
 all: clean $(TARGET) run

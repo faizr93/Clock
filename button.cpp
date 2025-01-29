@@ -1,34 +1,61 @@
 #include "button.h"
 #include <raylib.h>
 #include "globalConst.h"
+#include <vector>
 
 constexpr int TOTALNAVBUTTONS = 3;
-constexpr int OUTLINETHICKNESS = 10; // of navbuttons buttons
+constexpr int NAVBUTTONSPACING = 20; // of navbuttons buttons
+
+Buttons buttons;
 
 // Constructor, Initialize/Position To Default values
 Button::Button()
 {
-    padding = PADDING;
-    rect.height = GetScreenHeight() / 7;                                                  // Keeps it Consistent Across Resizing
-    rect.width = (GetScreenWidth() / TOTALNAVBUTTONS) - (OUTLINETHICKNESS)-10;            // All Equal Width, - 30 just for asthetic
-    rect = {padding, GetScreenHeight() - rect.height - padding, rect.width, rect.height}; // Perfect Positioning at the bottom
-    color = RAYWHITE;                                                                     // White Placeholder
+    rect.height = GetScreenHeight() / 7;                                    // Keeps it Consistent Across Resizing
+    rect.width = (GetScreenWidth() / TOTALNAVBUTTONS) - (NAVBUTTONSPACING); // All Equal Width, - magic number just for asthetic
+    rect.x = PADDING;                                                       // Padding Applied at Left, Right, Bottom
+    rect.y = GetScreenHeight() - rect.height - PADDING;                     // Perfect Positioning at the bottom
+    color = RAYWHITE;                                                       // White Placeholder
+    roundness = 0.69;
 }
 
-void initNavButtons(Buttons &buttons, Button &defaultButton)
+void Button::draw()
 {
-    const char *states[] = {"Time", "Stopwatch", "Alarm"};
-    float spacing = (GetScreenWidth() - (2 * defaultButton.padding) - (TOTALNAVBUTTONS * defaultButton.rect.width)) / (TOTALNAVBUTTONS - 1);
+    DrawRectangleRounded(rect, roundness, 10, color);
+    title.draw();
+}
 
+void Button::centerTitleRelative()
+{
+    int textWidth = MeasureText(title.text.c_str(), title.fontSize);
+    // int centerPosX = (GetScreenWidth() - textWidth) / 2;
+    title.x = rect.x + ((rect.width - textWidth) / 2);
+    title.y = rect.y + ((rect.height - title.fontSize) / 2);
+}
+
+void initNavButtons(Button &defaultButton)
+{
+    /*
+     * Calculates spacing between navigation buttons:
+     * - Start with total screen width.
+     * - Subtract left & right padding.
+     * - Subtract total width of all buttons.
+     * - Divide remaining space by gaps between buttons (TOTALNAVBUTTONS - 1).
+     */
+
+    float spacing = (GetScreenWidth() - (2 * PADDING) - (TOTALNAVBUTTONS * defaultButton.rect.width)) / (TOTALNAVBUTTONS - 1);
     for (size_t i = 0; i < TOTALNAVBUTTONS; i++)
     {
         buttons.push_back(defaultButton);
         buttons[i].title.text = states[i];
-        buttons[i].rect.x = defaultButton.padding + i * (defaultButton.rect.width + spacing);
+        buttons[i].rect.x = PADDING + i * (defaultButton.rect.width + spacing);
+        buttons[i].title.fontSize = buttons[i].rect.width / 7;
+        buttons[i].title.color = BLACK;
+        buttons[i].centerTitleRelative();
     }
 }
 
-bool handleNavButtonClicks(Buttons &buttons)
+bool handleNavButtonClicks()
 {
     // Check for mouse clicks
     if (!(IsMouseButtonPressed(MOUSE_BUTTON_LEFT) || IsMouseButtonPressed(MOUSE_BUTTON_RIGHT)))
@@ -53,16 +80,10 @@ bool handleNavButtonClicks(Buttons &buttons)
     return false;
 }
 
-void drawNavButtons(Buttons &buttons)
+void drawNavButtons()
 {
     for (auto &button : buttons)
     {
-        // DrawRectangleRec(button.rect, button.color);
-        DrawRectangleRounded(button.rect, 0.69, 1000, button.color);
-        // DrawRectangleLinesEx(button.rect, 5, BLACK);
-        // DrawRectangleLines(button.rect.x,button.rect.y,button.rect.width,button.rect.height,BLACK);
-        DrawRectangleRoundedLines(button.rect, 0.69, 1000, OUTLINETHICKNESS, BLACK);
-        // button.title.initNavButtonText();
-        button.title.draw();
+        button.draw();
     }
 }

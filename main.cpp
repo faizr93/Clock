@@ -8,6 +8,7 @@
 #include "text.h"
 #include "main.h"
 #include "globalConst.h"
+#include "alarm.h"
 
 using namespace std;
 using namespace chrono;
@@ -23,21 +24,17 @@ int main()
     SetTargetFPS(75);
 
     // Init Buttons
-    vector<Button> buttons;
     Button sampleButton;
-    initNavButtons(buttons, sampleButton);
+    initNavButtons(sampleButton);
 
-    DisplayedText topLeftText, topText, topRightText, timeText, stopWatchText, stateText, alarmText; // Declare all Text
+    DisplayedText topLeftText, topText, topRightText, timeText, stateText, alarmText; // Declare all Text
     timeText.text = getFormattedTime();                                                              // Init Time Text
     stateText.text = currentState;                                                                   // Init State Text
 
     setUpperText(topLeftText, topText, topRightText);
 
     // Init StopWatch
-    auto start = std::chrono::high_resolution_clock::now();
-    stopWatchText.text = getFormattedDuration(start).c_str();
-    bool stopWatchStarted = 0;
-    bool firstRunStopWatch = 1;
+    Stopwatch stopwatch;
 
     // Init Text Colors
     topLeftText.color = topText.color = topRightText.color = GRAY;
@@ -47,30 +44,26 @@ int main()
     topLeftText.fontSize = topText.fontSize = topRightText.fontSize = UPPERTEXT_FONTSIZE;
     stateText.fontSize = STATETEXT_FONTSIZE;
 
-    // Positition All Text
-    for (auto &button : buttons)
-    {
-        button.title.initNavButtonText(button);
-    }
-    posText(timeText, topText, sampleButton, stopWatchText, topLeftText, topRightText, stateText, buttons);
+    posText(topText, topLeftText, topRightText, stateText, timeText, buttons);
 
+    Alarm alarm;
     bool alarmOn = false;
     while (!WindowShouldClose())
     {
         // Update
-        handleNavButtonClicks(buttons); // This Function is Both a bool and A self contained function.
-        if (handleNavButtonClicks(buttons))
+        // handleNavButtonClicks(); // This Function is Both a bool and A self contained function.
+        if (handleNavButtonClicks())
         {
             stateText.text = currentState;
             setUpperText(topLeftText, topText, topRightText);
-            posText(timeText, topText, sampleButton, stopWatchText, topLeftText, topRightText, stateText, buttons);
+            posText(topText, topLeftText, topRightText, stateText, timeText, buttons);
         }
 
         // Render
         BeginDrawing();
         ClearBackground(BLACK);
 
-        drawNavButtons(buttons);
+        drawNavButtons();
         if (currentState == "TIME")
         {
             buttons[0].color = RED;
@@ -92,26 +85,10 @@ int main()
             buttons[1].title.color = RAYWHITE;
             buttons[2].title.color = BLACK;
 
-            if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && !handleNavButtonClicks(buttons))
-            {
-                firstRunStopWatch = 0;             // As Soon as its Clicked, This Flag is Set to 0 Until Reset
-                toggleStopWatch(stopWatchStarted); // Left button: Toggle Start/Stop
-            }
-            if (IsMouseButtonPressed(MOUSE_BUTTON_RIGHT) && !handleNavButtonClicks(buttons) && !stopWatchStarted) // Right button: Reset stopwatch On Stopped State
-            {
-                firstRunStopWatch = 1;
-                start = std::chrono::high_resolution_clock::now(); // Reset start time
-                stopWatchText.text = "00:00.00";                   // Reset the display text
-            }
-            if (firstRunStopWatch)
-            {
-                start = std::chrono::high_resolution_clock::now();
-            }
-            if (stopWatchStarted) // If stopwatch is running
-            {
-                stopWatchText.text = getFormattedDuration(start).c_str(); // Display the elapsed time
-            }
-            stopWatchText.draw();
+            stopwatch.handleInput();
+            stopwatch.update();
+            stopwatch.stopWatchText.posText(CENTER_TEXT_RELATIVE);
+            stopwatch.draw();
         }
         if (currentState == "ALARM")
         {
@@ -122,12 +99,8 @@ int main()
             buttons[1].title.color = BLACK;
             buttons[2].title.color = RAYWHITE;
 
-            Button alarm;
-            int height = GetScreenWidth() / 7;
-            alarm.rect.height = height;
-            alarm.rect.width = GetScreenWidth() - (10 * PADDING);
-            alarm.rect.y = (GetScreenHeight() - height - PADDING) / 2;
-            alarm.rect.x = (GetScreenWidth() - alarm.rect.width) / 2;
+            
+
             alarm.title.text = "6:00 Am";
             alarm.title.fontSize = alarm.rect.width / 7;
             alarm.title.y = alarm.rect.y + ((alarm.rect.height - alarm.title.fontSize) / 2) + 5;
@@ -143,16 +116,16 @@ int main()
             alarmToggle.rect.width = alarmToggle.rect.height + 10;
             alarmToggle.rect.x = alarm.rect.x + alarm.rect.width - (alarm.title.y - alarm.rect.y) - alarmToggle.rect.width;
             alarmToggle.rect.y = alarm.title.y;
-            
+
             Button hour, minuteTens, minuteOnes;
-            hour.rect.x = alarm.rect.x + ((alarm.rect.y + ((alarm.rect.height - alarm.title.fontSize) / 2) + 5) - alarm.rect.y) + 5;
-            hour.rect.y = alarm.rect.y + ((alarm.rect.height - alarm.title.fontSize) / 2) + 5;
-            hour.rect.height = alarmToggle.rect.width / 7;
-            hour.rect.width = alarmToggle.rect.width - 10;
+            hour.rect.x = alarm.rect.x + alarm.rect.y + ((alarm.rect.height - alarm.title.fontSize) / 2) - alarm.rect.y;
+            hour.rect.y = alarm.rect.y + ((alarm.rect.height - alarm.title.fontSize) / 2);
+            hour.rect.height = alarmToggle.rect.width;
+            hour.rect.width = alarmToggle.rect.width - 20;
             //  = GetScreenWidth() / 7
 
-            DrawRectangleRounded(hour.rect, 0.4, 10, DARKGRAY);
             DrawRectangleRounded(alarm.rect, 0.4, 10, DARKGRAY);
+            DrawRectangleRounded(hour.rect, 0.4, 10, RED);
             if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && CheckCollisionPointRec(GetMousePosition(), alarmToggle.rect))
             {
                 alarmOn = !alarmOn;
@@ -167,7 +140,7 @@ int main()
                 alarmToggle.color = RED;
                 alarmToggle.title.text = "OFF";
             }
-            alarmToggle.title.posText(BUTTON_TEXT_RELATIVE, alarmToggle);
+            alarmToggle.centerTitleRelative();
             DrawRectangleRounded(alarmToggle.rect, 0.4, 10, alarmToggle.color);
             alarm.title.draw();
             alarmToggle.title.draw();
@@ -181,25 +154,22 @@ int main()
     return 0;
 }
 
-void posText(DisplayedText &timeText, DisplayedText &topText, Button &sampleButton, DisplayedText &stopWatchText, DisplayedText &topLeftText, DisplayedText &topRightText, DisplayedText &stateText, Buttons buttons)
+void posText(DisplayedText &topText, DisplayedText &topLeftText, DisplayedText &topRightText, DisplayedText &stateText, DisplayedText &timeText, Buttons &buttons)
 {
+    // 1. Position independent elements first
+    for (auto &button : buttons)
     {
-        // 1. Position independent elements first
-        for (auto &button : buttons)
-        {
-            button.title.posText(BUTTON_TEXT_RELATIVE, button);
-        }
-        topText.posText(TOP, sampleButton);           // Top-centered
-        topLeftText.posText(TOPLEFT, sampleButton);   // Top-left corner
-        topRightText.posText(TOPRIGHT, sampleButton); // Top-right corner
-
-        // 2. Position elements relative to the above
-        timeText.posText(CENTER_TEXT_RELATIVE, sampleButton);
-        stopWatchText.posText(CENTER_TEXT_RELATIVE, sampleButton);
-
-        // 3. Finally, position elements with the most dependencies
-        stateText.posText(STATE_TEXT_RELATIVE, sampleButton);
+        button.centerTitleRelative();
     }
+    topText.posText(TOP);           // Top-centered
+    topLeftText.posText(TOPLEFT);   // Top-left corner
+    topRightText.posText(TOPRIGHT); // Top-right corner
+
+    // 2. Position elements relative to the above
+    timeText.posText(CENTER_TEXT_RELATIVE);
+
+    // 3. Finally, position elements with the most dependencies
+    stateText.posText(STATE_TEXT_RELATIVE);
 }
 
 void drawUpperText(DisplayedText &topLeftText, DisplayedText &topText, DisplayedText &topRightText)

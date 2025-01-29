@@ -3,9 +3,19 @@
 #include <iomanip>
 #include "stopWatch.h"
 #include "text.h"
+#include "button.h"
 
-// Returns String of Duration since Given Time Point, Formatted as MM:SS.Cs where Cs is centiseconds
-std::string getFormattedDuration(std::chrono::high_resolution_clock::time_point start)
+Stopwatch::Stopwatch()
+{
+    started = false;
+    firstRun = true;
+    stopWatchText.text = "00:00.00";
+    stopWatchText.posText(CENTER_TEXT_RELATIVE);
+    start = std::chrono::high_resolution_clock::now();
+}
+
+// Function to get the formatted duration (MM:SS.CS)
+std::string Stopwatch::getFormattedDuration()
 {
     auto end = std::chrono::high_resolution_clock::now();
     auto diff = end - start;
@@ -24,7 +34,34 @@ std::string getFormattedDuration(std::chrono::high_resolution_clock::time_point 
     return mystring.str();
 }
 
-void toggleStopWatch(bool &isStopWatchStarted)
+void Stopwatch::handleInput()
 {
-    isStopWatchStarted = !isStopWatchStarted;
+    if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && !handleNavButtonClicks())
+    {
+        firstRun = false;
+        started = !started;
+    }
+    if (IsMouseButtonPressed(MOUSE_BUTTON_RIGHT) && !started && !handleNavButtonClicks())
+    {
+        firstRun = true;
+        start = std::chrono::high_resolution_clock::now();
+        stopWatchText.text = "00:00.00";
+    }
+}
+
+void Stopwatch::update()
+{
+    if (firstRun)
+    {
+        start = std::chrono::high_resolution_clock::now();
+    }
+    if (started)
+    {
+        stopWatchText.text = getFormattedDuration(); // Use the internal function to get the formatted time
+    }
+}
+
+void Stopwatch::draw()
+{
+    stopWatchText.draw();
 }

@@ -1,10 +1,20 @@
 #pragma once
 #include <chrono>
 #include <string>
+#include "text.h"
 
-struct DisplayedText;
 
-// Returns String of Duration since Given Time Point, Formatted as MM:SS.Cs where Cs is centiseconds
-std::string getFormattedDuration(std::chrono::high_resolution_clock::time_point start);
+struct Stopwatch
+{
+    bool started;
+    bool firstRun;
+    std::chrono::high_resolution_clock::time_point start;
+    DisplayedText stopWatchText;
 
-void toggleStopWatch(bool &isStopWatchStarted); // toggles The boolean
+    Stopwatch();
+
+    std::string getFormattedDuration(); // Function to get the formatted duration (MM:SS.CS)
+    void handleInput();                 // Toggle, Reset
+    void update();                      // When Its Running
+    void draw();
+};
