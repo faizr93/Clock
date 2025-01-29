@@ -3,8 +3,9 @@
 
 struct Alarm : Button {  
     bool isOn;
-    Button toggleAlarm;
+    Button alarmToggleButton;
 
     Alarm();
     void toggle();
+    void initAlarmToggle();
 };

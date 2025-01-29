@@ -87,3 +87,20 @@ void drawNavButtons()
         button.draw();
     }
 }
+
+void handleActiveButton()
+{
+    for (size_t i = 0; i < TOTALNAVBUTTONS; i++)
+    {
+        if (currentState == states[i])
+        {
+            // Iterates over All buttons and Sets All of them Except Active Button To Light Gray;
+            for (size_t j = 0; j < TOTALNAVBUTTONS; j++)
+            {
+                buttons[j].color = (j == i) ? RED : LIGHTGRAY;
+                buttons[j].title.color = (j == i) ? RAYWHITE : BLACK;
+            }
+            return;
+        }
+    }
+}

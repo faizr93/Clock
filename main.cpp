@@ -28,8 +28,8 @@ int main()
     initNavButtons(sampleButton);
 
     DisplayedText topLeftText, topText, topRightText, timeText, stateText, alarmText; // Declare all Text
-    timeText.text = getFormattedTime();                                                              // Init Time Text
-    stateText.text = currentState;                                                                   // Init State Text
+    timeText.text = getFormattedTime();                                               // Init Time Text
+    stateText.text = currentState;                                                    // Init State Text
 
     setUpperText(topLeftText, topText, topRightText);
 
@@ -51,12 +51,13 @@ int main()
     while (!WindowShouldClose())
     {
         // Update
-        // handleNavButtonClicks(); // This Function is Both a bool and A self contained function.
+
         if (handleNavButtonClicks())
         {
             stateText.text = currentState;
             setUpperText(topLeftText, topText, topRightText);
             posText(topText, topLeftText, topRightText, stateText, timeText, buttons);
+            stopwatch.stopWatchText.posText(CENTER_TEXT_RELATIVE);
         }
 
         // Render
@@ -66,86 +67,37 @@ int main()
         drawNavButtons();
         if (currentState == "TIME")
         {
-            buttons[0].color = RED;
-            buttons[1].color = LIGHTGRAY;
-            buttons[2].color = LIGHTGRAY;
-            buttons[0].title.color = RAYWHITE;
-            buttons[1].title.color = BLACK;
-            buttons[2].title.color = BLACK;
-
             timeText.text = getFormattedTime();
             timeText.draw();
         }
         if (currentState == "STOPWATCH")
         {
-            buttons[0].color = LIGHTGRAY;
-            buttons[1].color = RED;
-            buttons[2].color = LIGHTGRAY;
-            buttons[0].title.color = BLACK;
-            buttons[1].title.color = RAYWHITE;
-            buttons[2].title.color = BLACK;
-
             stopwatch.handleInput();
             stopwatch.update();
-            stopwatch.stopWatchText.posText(CENTER_TEXT_RELATIVE);
             stopwatch.draw();
         }
         if (currentState == "ALARM")
         {
-            buttons[0].color = LIGHTGRAY;
-            buttons[1].color = LIGHTGRAY;
-            buttons[2].color = RED;
-            buttons[0].title.color = BLACK;
-            buttons[1].title.color = BLACK;
-            buttons[2].title.color = RAYWHITE;
+            // Button alarmToggleButton;
 
-            
-
-            alarm.title.text = "6:00 Am";
-            alarm.title.fontSize = alarm.rect.width / 7;
-            alarm.title.y = alarm.rect.y + ((alarm.rect.height - alarm.title.fontSize) / 2) + 5;
-            alarm.title.x = alarm.rect.x + (alarm.title.y - alarm.rect.y) + 5;
-
-            Button alarmToggle;
-            alarmToggle.title.text = "ON";
-            alarmToggle.title.fontSize = alarmToggle.rect.width / 8;
-            alarmToggle.title.x = alarm.rect.x + alarm.rect.width - (alarm.title.y - alarm.rect.y);
-            alarmToggle.title.y = alarm.title.y;
-
-            alarmToggle.rect.height = alarm.title.fontSize - 10;
-            alarmToggle.rect.width = alarmToggle.rect.height + 10;
-            alarmToggle.rect.x = alarm.rect.x + alarm.rect.width - (alarm.title.y - alarm.rect.y) - alarmToggle.rect.width;
-            alarmToggle.rect.y = alarm.title.y;
-
-            Button hour, minuteTens, minuteOnes;
-            hour.rect.x = alarm.rect.x + alarm.rect.y + ((alarm.rect.height - alarm.title.fontSize) / 2) - alarm.rect.y;
-            hour.rect.y = alarm.rect.y + ((alarm.rect.height - alarm.title.fontSize) / 2);
-            hour.rect.height = alarmToggle.rect.width;
-            hour.rect.width = alarmToggle.rect.width - 20;
+            // Button hour, minuteTens, minuteOnes;
+            // hour.rect.x = alarm.rect.x + alarm.rect.y + ((alarm.rect.height - alarm.title.fontSize) / 2) - alarm.rect.y;
+            // hour.rect.y = alarm.rect.y + ((alarm.rect.height - alarm.title.fontSize) / 2);
+            // hour.rect.height = alarmToggleButton.rect.width;
+            // hour.rect.width = alarmToggleButton.rect.width - 20;
             //  = GetScreenWidth() / 7
 
-            DrawRectangleRounded(alarm.rect, 0.4, 10, DARKGRAY);
-            DrawRectangleRounded(hour.rect, 0.4, 10, RED);
-            if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && CheckCollisionPointRec(GetMousePosition(), alarmToggle.rect))
-            {
-                alarmOn = !alarmOn;
-            }
-            if (alarmOn)
-            {
-                alarmToggle.color = DARKGREEN;
-                alarmToggle.title.text = "ON";
-            }
-            if (!alarmOn)
-            {
-                alarmToggle.color = RED;
-                alarmToggle.title.text = "OFF";
-            }
-            alarmToggle.centerTitleRelative();
-            DrawRectangleRounded(alarmToggle.rect, 0.4, 10, alarmToggle.color);
-            alarm.title.draw();
-            alarmToggle.title.draw();
-        }
+            // DrawRectangleRounded(hour.rect, 0.4, 10, RED);
 
+            alarm.toggle();
+            alarm.alarmToggleButton.centerTitleRelative();
+
+            DrawRectangleRounded(alarm.rect, 0.4, 10, DARKGRAY);
+            DrawRectangleRounded(alarm.alarmToggleButton.rect, 0.4, 10, alarm.alarmToggleButton.color);
+            alarm.title.draw();
+            alarm.alarmToggleButton.title.draw();
+        }
+        handleActiveButton();
         drawUpperText(topLeftText, topText, topRightText);
         stateText.draw();
         EndDrawing();
