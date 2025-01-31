@@ -88,7 +88,7 @@ void drawNavButtons()
     }
 }
 
-void handleActiveButton()
+void updateActiveButtonColor()
 {
     for (size_t i = 0; i < TOTALNAVBUTTONS; i++)
     {

@@ -7,7 +7,7 @@
 struct Stopwatch
 {
     bool started;
-    bool firstRun;
+    bool zeroState;
     std::chrono::high_resolution_clock::time_point start;
     DisplayedText stopWatchText;
 

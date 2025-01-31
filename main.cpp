@@ -47,11 +47,9 @@ int main()
     posText(topText, topLeftText, topRightText, stateText, timeText, buttons);
 
     Alarm alarm;
-    bool alarmOn = false;
     while (!WindowShouldClose())
     {
         // Update
-
         if (handleNavButtonClicks())
         {
             stateText.text = currentState;
@@ -63,8 +61,8 @@ int main()
         // Render
         BeginDrawing();
         ClearBackground(BLACK);
-
         drawNavButtons();
+
         if (currentState == "TIME")
         {
             timeText.text = getFormattedTime();
@@ -78,26 +76,15 @@ int main()
         }
         if (currentState == "ALARM")
         {
-            // Button alarmToggleButton;
-
-            // Button hour, minuteTens, minuteOnes;
-            // hour.rect.x = alarm.rect.x + alarm.rect.y + ((alarm.rect.height - alarm.title.fontSize) / 2) - alarm.rect.y;
-            // hour.rect.y = alarm.rect.y + ((alarm.rect.height - alarm.title.fontSize) / 2);
-            // hour.rect.height = alarmToggleButton.rect.width;
-            // hour.rect.width = alarmToggleButton.rect.width - 20;
-            //  = GetScreenWidth() / 7
-
-            // DrawRectangleRounded(hour.rect, 0.4, 10, RED);
-
             alarm.toggle();
-            alarm.alarmToggleButton.centerTitleRelative();
+            alarm.alarmToggle.centerTitleRelative();
 
             DrawRectangleRounded(alarm.rect, 0.4, 10, DARKGRAY);
-            DrawRectangleRounded(alarm.alarmToggleButton.rect, 0.4, 10, alarm.alarmToggleButton.color);
+            DrawRectangleRounded(alarm.alarmToggle.rect, 0.4, 10, alarm.alarmToggle.color);
             alarm.title.draw();
-            alarm.alarmToggleButton.title.draw();
+            alarm.alarmToggle.title.draw();
         }
-        handleActiveButton();
+        updateActiveButtonColor();
         drawUpperText(topLeftText, topText, topRightText);
         stateText.draw();
         EndDrawing();

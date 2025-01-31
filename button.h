@@ -27,4 +27,4 @@ extern Buttons buttons;
 void initNavButtons(Button &defaultButton); // Adds 3 Buttons(auto positioned properties) To Given std::vector<Button>
 void drawNavButtons();                      // Renders the Buttons from std::vector<Button>
 bool handleNavButtonClicks();               // Time, Alarm and Stopwatch Screen Navigation / Primary nav
-void handleActiveButton();                  // Turns Active Button Into Active Color and Also Changes Titles Color
+void updateActiveButtonColor();                  // Turns Active Button Into Active Color and Also Changes Titles Color

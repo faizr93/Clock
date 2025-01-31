@@ -7,8 +7,8 @@
 
 Stopwatch::Stopwatch()
 {
+    zeroState = true;
     started = false;
-    firstRun = true;
     stopWatchText.text = "00:00.00";
     stopWatchText.posText(CENTER_TEXT_RELATIVE);
     start = std::chrono::high_resolution_clock::now();
@@ -38,12 +38,12 @@ void Stopwatch::handleInput()
 {
     if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && !handleNavButtonClicks())
     {
-        firstRun = false;
+        zeroState = false;
         started = !started;
     }
     if (IsMouseButtonPressed(MOUSE_BUTTON_RIGHT) && !started && !handleNavButtonClicks())
     {
-        firstRun = true;
+        zeroState = true;
         start = std::chrono::high_resolution_clock::now();
         stopWatchText.text = "00:00.00";
     }
@@ -51,7 +51,7 @@ void Stopwatch::handleInput()
 
 void Stopwatch::update()
 {
-    if (firstRun)
+    if (zeroState)
     {
         start = std::chrono::high_resolution_clock::now();
     }
