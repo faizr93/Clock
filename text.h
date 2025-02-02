@@ -23,7 +23,6 @@ struct DisplayedText
     int y;
     int fontSize;
     int topTextFontSize; // Needed for Relative Spacing, its a Workaround
-    int padding;
     DisplayedText();
     void draw();
     void posText(Position position);

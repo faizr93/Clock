@@ -9,4 +9,4 @@
 
 constexpr int PADDING = 20;      // Primary Buttons at bottom, alarm, stopwatch, time
 extern std::string currentState; // of text and navbuttons
-extern const char *states[];
+extern const char *states[3];

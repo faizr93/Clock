@@ -23,6 +23,10 @@ int main()
     InitWindow(800, 600, "Clock");
     SetTargetFPS(75);
 
+    // Init Audio and Alarm Sound
+    InitAudioDevice();
+    
+
     // Init Buttons
     Button sampleButton;
     initNavButtons(sampleButton);
@@ -30,8 +34,7 @@ int main()
     DisplayedText topLeftText, topText, topRightText, timeText, stateText, alarmText; // Declare all Text
     timeText.text = getFormattedTime();                                               // Init Time Text
     stateText.text = currentState;                                                    // Init State Text
-
-    setUpperText(topLeftText, topText, topRightText);
+    setUpperText(topLeftText, topText, topRightText);                                 // Init Upper Text
 
     // Init StopWatch
     Stopwatch stopwatch;
@@ -46,7 +49,12 @@ int main()
 
     posText(topText, topLeftText, topRightText, stateText, timeText, buttons);
 
+    // Init Alarm
     Alarm alarm;
+
+    std::vector<Button *> timeButtons = alarm.initTimeButtons();
+    alarm.positionTimeElements();
+
     while (!WindowShouldClose())
     {
         // Update
@@ -56,11 +64,13 @@ int main()
             setUpperText(topLeftText, topText, topRightText);
             posText(topText, topLeftText, topRightText, stateText, timeText, buttons);
             stopwatch.stopWatchText.posText(CENTER_TEXT_RELATIVE);
+            alarm.positionTimeElements();
         }
 
         // Render
         BeginDrawing();
         ClearBackground(BLACK);
+        updateActiveButtonColor();
         drawNavButtons();
 
         if (currentState == "TIME")
@@ -76,19 +86,18 @@ int main()
         }
         if (currentState == "ALARM")
         {
-            alarm.toggle();
-            alarm.alarmToggle.centerTitleRelative();
-
-            DrawRectangleRounded(alarm.rect, 0.4, 10, DARKGRAY);
-            DrawRectangleRounded(alarm.alarmToggle.rect, 0.4, 10, alarm.alarmToggle.color);
-            alarm.title.draw();
-            alarm.alarmToggle.title.draw();
+            alarm.handleInput();
+            alarm.updateTimeButtonRects();
+            alarm.draw();
         }
-        updateActiveButtonColor();
+        alarm.handleRing();
         drawUpperText(topLeftText, topText, topRightText);
         stateText.draw();
         EndDrawing();
     }
+
+    UnloadMusicStream(alarm.alarmRingtone);
+    CloseAudioDevice();
     CloseWindow();
     return 0;
 }

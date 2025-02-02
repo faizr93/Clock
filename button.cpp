@@ -2,6 +2,7 @@
 #include <raylib.h>
 #include "globalConst.h"
 #include <vector>
+#include <string.h>
 
 constexpr int TOTALNAVBUTTONS = 3;
 constexpr int NAVBUTTONSPACING = 20; // of navbuttons buttons
@@ -28,9 +29,12 @@ void Button::draw()
 void Button::centerTitleRelative()
 {
     int textWidth = MeasureText(title.text.c_str(), title.fontSize);
+    int textHeight = MeasureTextEx(GetFontDefault(), title.text.c_str(), title.fontSize, 1).y;
     // int centerPosX = (GetScreenWidth() - textWidth) / 2;
+
+    // title.y = rect.y + ((rect.height - title.fontSize) / 2);
     title.x = rect.x + ((rect.width - textWidth) / 2);
-    title.y = rect.y + ((rect.height - title.fontSize) / 2);
+    title.y = rect.y + ((rect.height - textHeight) / 2);
 }
 
 void initNavButtons(Button &defaultButton)
@@ -92,12 +96,11 @@ void updateActiveButtonColor()
 {
     for (size_t i = 0; i < TOTALNAVBUTTONS; i++)
     {
-        if (currentState == states[i])
+        if (strcmp(currentState.c_str(), states[i]) == 0)
         {
-            // Iterates over All buttons and Sets All of them Except Active Button To Light Gray;
             for (size_t j = 0; j < TOTALNAVBUTTONS; j++)
             {
-                buttons[j].color = (j == i) ? RED : LIGHTGRAY;
+                buttons[j].color = (j == i) ? RED : LIGHTGRAY; // Inactive to LIGHTGRAY
                 buttons[j].title.color = (j == i) ? RAYWHITE : BLACK;
             }
             return;

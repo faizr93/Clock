@@ -1,23 +1,35 @@
 #pragma once
 #include "button.h"
 
-struct Alarm : Button {  
+struct Alarm : Button
+{
     bool isOn;
+    bool isRinging;
     Button alarmToggle;
 
     Button hour;
     Button minuteOnes;
     Button minuteTens;
+    Button AMPM;
+    Music alarmRingtone;
+
+    DisplayedText semiColon;
 
     Alarm();
 
-    void inithour();
-    void initminuteOnes();
-    void initminuteTens();
-    void toggle();
+    std::vector<Button *> initTimeButtons();
+
+    void updateTimeButtonRects();
+
+    void handleInput();
+    void positionTimeElements();
+    void drawTimeElements();
     void initAlarmToggle();
-    void initAlarmToggleRect();
-    void initAlarmToggleTitle();
+    void draw();
+
+    int getAlarmTimeInMinutes(const std::string &time_string);
+    int getCurrentTimeInMinutes();
+
+    void handleRing();
+
 };
-
-

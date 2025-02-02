@@ -13,7 +13,7 @@ struct Button
     DisplayedText title; // Name that Appears on Hover or used instead of icon
     Rectangle rect;      // Visual Rectangle of the Button To be Displayed and Positioned
     Color color;
-    float roundness;
+    float roundness, padding;
 
     /// @brief Creates & Positions Button Relative to Screen width/height at the bottom.
     Button(); // Constructor
